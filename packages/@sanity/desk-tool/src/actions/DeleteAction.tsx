@@ -1,6 +1,6 @@
+import {TrashIcon} from '@sanity/icons'
 import {useDocumentOperation} from '@sanity/react-hooks'
-import TrashIcon from 'part:@sanity/base/trash-icon'
-import React, {useCallback} from 'react'
+import React, {useCallback, useState} from 'react'
 
 import {
   unstable_useCheckDocumentPermission as useCheckDocumentPermission,
@@ -15,8 +15,8 @@ const DISABLED_REASON_TITLE = {
 
 export function DeleteAction({id, type, draft, published, onComplete}) {
   const {delete: deleteOp}: any = useDocumentOperation(id, type)
-  const [isDeleting, setIsDeleting] = React.useState(false)
-  const [isConfirmDialogOpen, setConfirmDialogOpen] = React.useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isConfirmDialogOpen, setConfirmDialogOpen] = useState(false)
 
   const handleCancel = useCallback(() => {
     setConfirmDialogOpen(false)
@@ -31,8 +31,10 @@ export function DeleteAction({id, type, draft, published, onComplete}) {
   }, [deleteOp, onComplete])
 
   const handle = useCallback(() => {
-    setConfirmDialogOpen(true)
-  }, [])
+    if (!isConfirmDialogOpen) {
+      setConfirmDialogOpen(true)
+    }
+  }, [isConfirmDialogOpen])
 
   const deletePermission = useCheckDocumentPermission(id, type, 'delete')
 
@@ -51,17 +53,17 @@ export function DeleteAction({id, type, draft, published, onComplete}) {
       ),
     }
   }
+
   return {
     icon: TrashIcon,
-    disabled: Boolean(deleteOp.disabled),
+    disabled: isDeleting || Boolean(deleteOp.disabled),
     title: (deleteOp.disabled && DISABLED_REASON_TITLE[deleteOp.disabled]) || '',
     label: isDeleting ? 'Deleting…' : 'Delete',
     shortcut: 'Ctrl+Alt+D',
     onHandle: handle,
     dialog: isConfirmDialogOpen && {
-      type: 'legacy',
+      type: 'modal',
       onClose: onComplete,
-      title: 'Delete',
       content: (
         <ConfirmDelete
           draft={draft}

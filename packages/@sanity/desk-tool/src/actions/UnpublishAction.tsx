@@ -57,7 +57,7 @@ export function UnpublishAction({id, type, draft, published, onComplete, liveEdi
       return {
         type: 'legacy',
         onClose: onComplete,
-        title: 'Unpublish',
+        // title: 'Unpublish',
         content: (
           <ConfirmUnpublish
             draft={draft}
